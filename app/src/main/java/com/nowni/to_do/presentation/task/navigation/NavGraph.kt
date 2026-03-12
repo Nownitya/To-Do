@@ -63,17 +63,7 @@ fun AppNavGraph() {
 
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Home> {
-//            val viewModel: TaskViewModel = viewModel(
-//                factory = object : ViewModelProvider.Factory {
-//                    @Suppress("UNCHECKED_CAST")
-//                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//                        return TaskViewModel(
-//                            getTasksUseCase = getTasksUseCase,
-//                            repository = repository
-//                        ) as T
-//                    }
-//                }
-//            )
+
             val state by viewModel.state.collectAsState()
 
             TaskListScreen(
