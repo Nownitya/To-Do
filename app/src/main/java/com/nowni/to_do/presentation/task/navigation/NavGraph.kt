@@ -24,6 +24,7 @@ import com.nowni.to_do.presentation.task.TaskViewModel
 import com.nowni.to_do.presentation.task.ui.AddEditTaskScreen
 import com.nowni.to_do.presentation.task.ui.TaskListScreen
 
+
 @Composable
 fun AppNavGraph() {
     val backStack: NavBackStack<NavKey> = rememberNavBackStack(Home)
@@ -99,17 +100,6 @@ fun AppNavGraph() {
                 )
         }
         entry<AddEditTask> { key ->
-//            val viewModel: TaskViewModel = viewModel(
-//                factory = object : ViewModelProvider.Factory {
-//                    @Suppress("UNCHECKED_CAST")
-//                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//                        return TaskViewModel(
-//                            getTasksUseCase = getTasksUseCase,
-//                            repository = repository
-//                        ) as T
-//                    }
-//                }
-//            )
 
             AddEditTaskScreen(
                 taskId = key.taskId,
