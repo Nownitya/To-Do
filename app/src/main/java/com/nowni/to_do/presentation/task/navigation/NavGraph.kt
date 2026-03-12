@@ -34,9 +34,7 @@ fun AppNavGraph() {
 
     val database = remember {
         Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "todo_database"
+            context, AppDatabase::class.java, "todo_database"
         ).build()
     }
 
@@ -48,32 +46,19 @@ fun AppNavGraph() {
         GetTasksUseCase(repository)
     }
 
-    val viewModel: TaskViewModel =viewModel(
-        factory = object : ViewModelProvider.Factory{
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return TaskViewModel(
-                    getTasksUseCase = getTasksUseCase,
-                    repository = repository
-                ) as T
-            }
-
+    val viewModel: TaskViewModel = viewModel(factory = object : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return TaskViewModel(
+                getTasksUseCase = getTasksUseCase, repository = repository
+            ) as T
         }
-    )
+
+    })
 
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Home> {
-//            val viewModel: TaskViewModel = viewModel(
-//                factory = object : ViewModelProvider.Factory {
-//                    @Suppress("UNCHECKED_CAST")
-//                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//                        return TaskViewModel(
-//                            getTasksUseCase = getTasksUseCase,
-//                            repository = repository
-//                        ) as T
-//                    }
-//                }
-//            )
+
             val state by viewModel.state.collectAsState()
 
             TaskListScreen(
@@ -105,8 +90,7 @@ fun AppNavGraph() {
                 taskId = key.taskId,
                 viewModel = viewModel,
                 onSave = { backStack.removeLastOrNull() },
-                onCancel = { backStack.removeLastOrNull() }
-            )
+                onCancel = { backStack.removeLastOrNull() })
         }
     }
 
