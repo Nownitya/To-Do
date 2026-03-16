@@ -6,8 +6,10 @@ import com.nowni.to_do.domain.model.Task
 import com.nowni.to_do.domain.repository.TaskRepository
 import com.nowni.to_do.domain.usecase.GetTasksUseCase
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -22,6 +24,12 @@ class TaskViewModel(
 
     private var observeJob: Job? = null
 
+    private val _uiEvent = MutableSharedFlow<TaskUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
+    private var recentlyDeletedTask: Task? = null
+
+
     init {
         observeTasks()
     }
@@ -31,6 +39,7 @@ class TaskViewModel(
 //            is TaskEvent.LoadTasks -> loadTasks()
             is TaskEvent.ToggleTask -> toggleTask(event.taskId)
             is TaskEvent.DeleteTask -> deleteTask(event.taskId)
+            is TaskEvent.UndoDelete -> restoreDeletedTask()
             is TaskEvent.AddTask -> addTask(event.task)
             is TaskEvent.UpdateTask -> updateTask(event.task)
             is TaskEvent.SearchTask -> {
@@ -100,7 +109,26 @@ class TaskViewModel(
     private fun deleteTask(taskId: Long) {
         viewModelScope.launch {
             val task = repository.getTaskById(taskId)
-            task?.let { repository.deleteTask(it) }
+            task?.let {
+                repository.deleteTask(it)
+                recentlyDeletedTask = it
+                _uiEvent.emit(
+                    TaskUiEvent.ShowSnackbar(
+                        message = "Task Deleted",
+                        action = "Undo"
+
+                    )
+                )
+            }
+        }
+    }
+
+    private fun restoreDeletedTask() {
+        viewModelScope.launch{
+            recentlyDeletedTask?.let { task->
+                repository.insertTask(task)
+                recentlyDeletedTask=null
+            }
         }
     }
 
