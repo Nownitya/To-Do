@@ -1,4 +1,4 @@
-package com.nowni.to_do.presentation.task.navigation
+package com.nowni.to_do.presentation.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

@@ -53,7 +53,7 @@ fun TaskItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -65,8 +65,7 @@ fun TaskItem(
                         value = task.isCompleted,
                         onValueChange = { onToggleTask(task.id) },
                         role = Role.Checkbox
-                    ),
-                verticalAlignment = Alignment.CenterVertically
+                    ), verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
                     checked = task.isCompleted,
@@ -90,15 +89,15 @@ fun TaskItem(
                             text = task.description,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 5,
-                            textDecoration = textDecoration
+                            maxLines = 2,
+                            textDecoration = textDecoration,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             }
             IconButton(
-                onClick = { onDeleteTask(task.id) },
-                modifier = Modifier.padding(end = 4.dp)
+                onClick = { onDeleteTask(task.id) }, modifier = Modifier.padding(end = 4.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -121,11 +120,7 @@ fun TaskItemNotCompletedPreview() {
                 priority = TaskPriority.MEDIUM,
                 description = "Milk, Eggs, Bread",
                 isCompleted = false
-            ),
-            onToggleTask = {},
-            onDeleteTask = {},
-            onTaskClick = {}
-        )
+            ), onToggleTask = {}, onDeleteTask = {}, onTaskClick = {})
     }
 }
 
@@ -140,11 +135,7 @@ fun TaskItemCompletedPreview() {
                 priority = TaskPriority.LOW,
                 description = "Vacuum and dust",
                 isCompleted = true
-            ),
-            onToggleTask = {},
-            onDeleteTask = {},
-            onTaskClick = {}
-        )
+            ), onToggleTask = {}, onDeleteTask = {}, onTaskClick = {})
     }
 }
 
@@ -160,41 +151,32 @@ private fun TaskItemPreview() {
                     priority = TaskPriority.MEDIUM,
                     description = "Milk, Eggs, Bread",
                     isCompleted = false
-                ),
-                Task(
+                ), Task(
                     id = 2,
                     title = "Clean the house",
                     priority = TaskPriority.LOW,
                     description = "Vacuum and dust",
                     isCompleted = true
-                ),
-                Task(
+                ), Task(
                     id = 3,
                     title = "Important Meeting",
                     priority = TaskPriority.HIGH,
                     description = "Discuss project roadmap",
                     isCompleted = false
-                ),
-                Task(
+                ), Task(
                     id = 4,
                     title = "Gym Session",
                     priority = TaskPriority.MEDIUM,
                     isCompleted = false
-                ),
-                Task(
+                ), Task(
                     id = 5,
                     title = "Study for exams",
                     priority = TaskPriority.HIGH,
                     description = "Focus on Chapter 5 to 10",
                     isCompleted = true
-                ),
-                Task(
-                    id = 6,
-                    title = "Walk the dog",
-                    priority = TaskPriority.LOW,
-                    isCompleted = false
-                ),
-                Task(
+                ), Task(
+                    id = 6, title = "Walk the dog", priority = TaskPriority.LOW, isCompleted = false
+                ), Task(
                     id = 7,
                     title = "Plan summer vacation",
                     priority = TaskPriority.MEDIUM,
@@ -211,17 +193,13 @@ private fun TaskItemPreview() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 tasks.forEach { task ->
-                    TaskItem(
-                        task = task,
-                        onToggleTask = { id ->
-                            val index = tasks.indexOfFirst { it.id == id }
-                            if (index != -1) {
-                                tasks[index] = tasks[index].copy(isCompleted = !tasks[index].isCompleted)
-                            }
-                        },
-                        onDeleteTask = { id -> tasks.removeIf { it.id == id } },
-                        onTaskClick = {}
-                    )
+                    TaskItem(task = task, onToggleTask = { id ->
+                        val index = tasks.indexOfFirst { it.id == id }
+                        if (index != -1) {
+                            tasks[index] =
+                                tasks[index].copy(isCompleted = !tasks[index].isCompleted)
+                        }
+                    }, onDeleteTask = { id -> tasks.removeIf { it.id == id } }, onTaskClick = {})
                 }
             }
         }

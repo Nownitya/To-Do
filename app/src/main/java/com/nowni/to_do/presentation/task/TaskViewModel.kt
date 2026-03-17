@@ -28,6 +28,7 @@ class TaskViewModel(
     val uiEvent = _uiEvent.asSharedFlow()
 
     private var recentlyDeletedTask: Task? = null
+    private var recentlyDeletedTasks = mutableListOf<Task>()
 
 
     init {
@@ -65,7 +66,8 @@ class TaskViewModel(
         observeJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             getTasksUseCase(
-                searchQuery = _state.value.searchQuery, sortOptions = _state.value.sortOptions
+                searchQuery = _state.value.searchQuery,
+                sortOptions = _state.value.sortOptions
             ).catch { exception ->
                 _state.update {
                     it.copy(
@@ -108,17 +110,23 @@ class TaskViewModel(
 
     private fun deleteTask(taskId: Long) {
         viewModelScope.launch {
-            val task = repository.getTaskById(taskId)
-            task?.let {
-                repository.deleteTask(it)
-                recentlyDeletedTask = it
-                _uiEvent.emit(
-                    TaskUiEvent.ShowSnackbar(
-                        message = "Task Deleted",
-                        action = "Undo"
+            val task = state.value.tasks.firstOrNull{ it.id == taskId} ?: repository.getTaskById(taskId)
+            task?.let { task ->
+                try {
+                    repository.deleteTask(task)
+                } catch (e: Exception) {
+                    _state.update { it.copy(error = "Delete Failed") }
+                }
+                recentlyDeletedTask = task
+                viewModelScope.launch{
+                    _uiEvent.emit(
+                        TaskUiEvent.ShowSnackbar(
+                            message = "Task Deleted",
+                            action = "Undo"
 
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -141,7 +149,7 @@ class TaskViewModel(
         }
     }
 
-    fun getTaskFromCache(taskId: Long): Task? {
+    fun getTaskFromState(taskId: Long): Task? {
         return state.value.tasks.firstOrNull { it.id == taskId }
     }
 
