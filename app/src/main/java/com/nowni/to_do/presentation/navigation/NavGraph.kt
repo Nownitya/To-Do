@@ -64,6 +64,7 @@ fun AppNavGraph() {
             TaskListScreen(
                 tasks = state.tasks,
                 listState = taskListState,
+                viewModel=viewModel, // check and correct this.
                 searchQuery = state.searchQuery,
                 onSearchQueryChange = { viewModel.onEvent(TaskEvent.SearchTask(it)) },
                 isLoading = state.isLoading,
