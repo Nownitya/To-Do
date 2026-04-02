@@ -2,6 +2,7 @@ package com.nowni.to_do.presentation.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nowni.to_do.data.reminder.ReminderScheduler
 import com.nowni.to_do.domain.model.Task
 import com.nowni.to_do.domain.repository.TaskRepository
 import com.nowni.to_do.domain.usecase.GetTasksUseCase
@@ -15,7 +16,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TaskViewModel(
-    private val getTasksUseCase: GetTasksUseCase, private val repository: TaskRepository
+    private val getTasksUseCase: GetTasksUseCase,
+    private val repository: TaskRepository,
+    private val scheduler: ReminderScheduler
 ) : ViewModel() {
 
     // later: viewModelScope.launch{ . . . }
@@ -88,6 +91,13 @@ class TaskViewModel(
         viewModelScope.launch {
             try {
                 repository.insertTask(task)
+                task.reminderDate?.let {
+                    scheduler.schedule(
+                        taskId = task.id,
+                        title = task.title,
+                        reminderTime = it.atStartOfDay()
+                    )
+                }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(error = e.message ?: "Failed to add task")
@@ -100,6 +110,15 @@ class TaskViewModel(
         viewModelScope.launch {
             try {
                 repository.updateTask(task)
+                scheduler.cancel(task.id)
+
+                task.reminderDate?.let {
+                    scheduler.schedule(
+                        taskId= task.id,
+                        title = task.title,
+                        reminderTime = it.atStartOfDay()
+                    )
+                }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(error = e.message ?: "Failed to update task")
@@ -114,6 +133,8 @@ class TaskViewModel(
             task?.let { task ->
                 try {
                     repository.deleteTask(task)
+
+                    scheduler.cancel(taskId)
                 } catch (e: Exception) {
                     _state.update { it.copy(error = "Delete Failed") }
                 }
@@ -123,7 +144,6 @@ class TaskViewModel(
                         TaskUiEvent.ShowSnackbar(
                             message = "Task Deleted",
                             action = "Undo"
-
                         )
                     )
                 }
@@ -135,6 +155,14 @@ class TaskViewModel(
         viewModelScope.launch{
             recentlyDeletedTask?.let { task->
                 repository.insertTask(task)
+
+                task.reminderDate?.let {
+                    scheduler.schedule(
+                        taskId = task.id,
+                        title = task.title,
+                        reminderTime = it.atStartOfDay()
+                    )
+                }
                 recentlyDeletedTask=null
             }
         }

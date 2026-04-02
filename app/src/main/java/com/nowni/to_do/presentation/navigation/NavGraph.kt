@@ -17,6 +17,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.room.Room
 import com.nowni.to_do.data.local.database.AppDatabase
+import com.nowni.to_do.data.reminder.ReminderScheduler
 import com.nowni.to_do.data.repository.TaskRepositoryImpl
 import com.nowni.to_do.domain.usecase.GetTasksUseCase
 import com.nowni.to_do.presentation.task.TaskEvent
@@ -46,14 +47,17 @@ fun AppNavGraph() {
         GetTasksUseCase(repository)
     }
 
+    val scheduler = remember {
+        ReminderScheduler(context)
+    }
+
     val viewModel: TaskViewModel = viewModel(factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return TaskViewModel(
-                getTasksUseCase = getTasksUseCase, repository = repository
+                getTasksUseCase = getTasksUseCase, repository = repository, scheduler = scheduler
             ) as T
         }
-
     })
 
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
@@ -64,7 +68,7 @@ fun AppNavGraph() {
             TaskListScreen(
                 tasks = state.tasks,
                 listState = taskListState,
-                viewModel=viewModel, // check and correct this.
+                viewModel = viewModel, // check and correct this.
                 searchQuery = state.searchQuery,
                 onSearchQueryChange = { viewModel.onEvent(TaskEvent.SearchTask(it)) },
                 isLoading = state.isLoading,

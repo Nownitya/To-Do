@@ -8,20 +8,20 @@ import com.nowni.to_do.domain.sort.SortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetTasksUseCase(private val repository: TaskRepository){
+class GetTasksUseCase(private val repository: TaskRepository) {
     operator fun invoke(
         searchQuery: String,
         sortOptions: SortOptions
     ): Flow<List<Task>> {
-        return repository.getTasks().map { tasks->
+        return repository.getTasks().map { tasks ->
             var filtered = tasks
             if (searchQuery.isNotBlank()) {
-                filtered= filtered.filter {
+                filtered = filtered.filter {
                     it.title.contains(searchQuery, ignoreCase = true) ||
                             it.description.contains(searchQuery, ignoreCase = true)
                 }
             }
-            filtered= sortTasks(filtered, sortOptions)
+            filtered = sortTasks(filtered, sortOptions)
             filtered
 
         }
@@ -44,9 +44,9 @@ class GetTasksUseCase(private val repository: TaskRepository){
             SortField.CREATED_DATE -> tasks.sortedBy { it.id }
 
         }
-        return if (options.order == SortOrder.DESCENDING)
+        return if (options.order == SortOrder.DESCENDING) {
             sorted.reversed()
-        else sorted
+        } else sorted
 
     }
 
