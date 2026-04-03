@@ -27,7 +27,9 @@ import com.nowni.to_do.presentation.task.ui.TaskListScreen
 
 
 @Composable
-fun AppNavGraph() {
+fun AppNavGraph(
+    onThemeToggle:()-> Unit
+) {
     val backStack: NavBackStack<NavKey> = rememberNavBackStack(Home)
     val taskListState = rememberLazyListState()
 
@@ -86,6 +88,7 @@ fun AppNavGraph() {
                 onToggleTask = { taskId ->
                     viewModel.onEvent(TaskEvent.ToggleTask(taskId))
                 },
+                onThemeToggle = onThemeToggle
 
                 )
         }

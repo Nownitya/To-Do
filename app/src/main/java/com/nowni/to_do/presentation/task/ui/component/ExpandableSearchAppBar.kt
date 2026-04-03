@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,12 +29,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandableSearchAppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onThemeToggle:()-> Unit
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -50,7 +53,9 @@ fun ExpandableSearchAppBar(
                 })
 
             false -> DefaultAppBar(
-                onSearchClick = { isSearchActive = true })
+                onSearchClick = { isSearchActive=true},
+                onThemeToggle = onThemeToggle,
+            )
         }
     }
 
@@ -65,6 +70,7 @@ fun SearchField(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
+        delay(100)
         focusRequester.requestFocus()
         keyboardController?.show()
     }
@@ -105,6 +111,7 @@ fun SearchField(
 @Composable
 fun DefaultAppBar(
     onSearchClick: () -> Unit,
+    onThemeToggle:() -> Unit
 ) {
     TopAppBar(title = { Text("T0-Do") }, actions = {
         IconButton(
@@ -114,6 +121,13 @@ fun DefaultAppBar(
                 imageVector = Icons.Default.Search, contentDescription = null
             )
         }
+        IconButton(onClick = onThemeToggle) {
+            Icon(
+                imageVector = Icons.Default.DarkMode,
+                contentDescription = "Toggle Theme"
+            )
+        }
+
     })
 }
 

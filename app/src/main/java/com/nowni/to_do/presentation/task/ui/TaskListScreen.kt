@@ -60,6 +60,7 @@ fun TaskListScreen(
     onEditTask: (Long) -> Unit,
     onDeleteTask: (Long) -> Unit,
     onToggleTask: (Long) -> Unit,
+    onThemeToggle:() -> Unit
 ) {
 
     var previousSize by remember { mutableIntStateOf(tasks.size) }
@@ -93,7 +94,9 @@ fun TaskListScreen(
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
         ExpandableSearchAppBar(
-            searchQuery = searchQuery, onSearchQueryChange = onSearchQueryChange
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            onThemeToggle = onThemeToggle
         )
 
     }, floatingActionButton = {
