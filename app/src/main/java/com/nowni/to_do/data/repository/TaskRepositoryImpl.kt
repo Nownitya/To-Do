@@ -21,9 +21,10 @@ class TaskRepositoryImpl(
         return taskDao.getTaskById(id)?.toDomain()
     }
 
-    override suspend fun insertTask(task: Task) {
-        taskDao.insertTask(task.toEntity())
+    override suspend fun insertTask(task: Task): Long {
+        return taskDao.insertTask(task.toEntity())
     }
+
 
     override suspend fun updateTask(task: Task) {
         taskDao.updateTask(task.toEntity())

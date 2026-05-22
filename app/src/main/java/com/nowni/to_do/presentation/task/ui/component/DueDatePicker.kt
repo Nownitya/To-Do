@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 fun DueDatePicker(
     date: LocalDate?, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyy")
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
     val text = date?.format(formatter) ?: "No due date"
 
     OutlinedTextField(
@@ -31,7 +31,8 @@ fun DueDatePicker(
         label = { Text("Due date") },
         trailingIcon = {
             Icon(
-                imageVector = Icons.Default.Event, contentDescription = "Pick due date"
+                imageVector = Icons.Default.Event,
+                contentDescription = "Pick due date"
             )
         })
 }

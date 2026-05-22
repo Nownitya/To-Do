@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nowni.to_do.data.reminder.ReminderScheduler
 import com.nowni.to_do.domain.model.Task
-import com.nowni.to_do.domain.repository.TaskRepository
-import com.nowni.to_do.domain.usecase.GetTasksUseCase
+import com.nowni.to_do.domain.usecase.TaskUseCases
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,9 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TaskViewModel(
-    private val getTasksUseCase: GetTasksUseCase,
-    private val repository: TaskRepository,
-    private val scheduler: ReminderScheduler
+    private val useCase: TaskUseCases, private val scheduler: ReminderScheduler
 ) : ViewModel() {
 
     // later: viewModelScope.launch{ . . . }
@@ -26,13 +24,14 @@ class TaskViewModel(
     val state: StateFlow<TaskState> = _state
 
     private var observeJob: Job? = null
+    private var searchJob: Job? = null
 
-    private val _uiEvent = MutableSharedFlow<TaskUiEvent>()
+    private val _uiEvent = MutableSharedFlow<TaskUiEvent>(
+        extraBufferCapacity = 1
+    )
     val uiEvent = _uiEvent.asSharedFlow()
 
     private var recentlyDeletedTask: Task? = null
-    private var recentlyDeletedTasks = mutableListOf<Task>()
-
 
     init {
         observeTasks()
@@ -47,8 +46,15 @@ class TaskViewModel(
             is TaskEvent.AddTask -> addTask(event.task)
             is TaskEvent.UpdateTask -> updateTask(event.task)
             is TaskEvent.SearchTask -> {
-                _state.update { it.copy(searchQuery = event.query) }
-                observeTasks()
+                _state.update {
+                    it.copy(searchQuery = event.query)
+                }
+                searchJob?.cancel()
+
+                searchJob = viewModelScope.launch {
+                    delay(300)
+                    observeTasks()
+                }
             }
 
             is TaskEvent.SortTasks -> {
@@ -62,15 +68,27 @@ class TaskViewModel(
          return cachedTasks.firstOrNull { it.id == taskId }
      }*/
 
+    private fun clearError() {
+        _state.update {
+            it.copy(error = null)
+        }
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        _state.update {
+            it.copy(isLoading = isLoading)
+        }
+    }
+
     private fun observeTasks() {
         observeJob?.cancel()
 
 
         observeJob = viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            getTasksUseCase(
-                searchQuery = _state.value.searchQuery,
-                sortOptions = _state.value.sortOptions
+//            _state.update { it.copy(isLoading = true) }
+            setLoading(true)
+            useCase.getTasks(
+                searchQuery = _state.value.searchQuery, sortOptions = _state.value.sortOptions
             ).catch { exception ->
                 _state.update {
                     it.copy(
@@ -89,90 +107,128 @@ class TaskViewModel(
 
     private fun addTask(task: Task) {
         viewModelScope.launch {
+            clearError()
+            setLoading(true)
             try {
-                repository.insertTask(task)
-                task.reminderDate?.let {
+                val insertedId = useCase.addTask(task)
+                task.reminderDateTime?.let {
                     scheduler.schedule(
-                        taskId = task.id,
-                        title = task.title,
-                        reminderTime = it.atStartOfDay()
+                        taskId = insertedId, title = task.title, reminderTime = it
                     )
                 }
+                _uiEvent.emit(TaskUiEvent.NavigateBack)
             } catch (e: Exception) {
                 _state.update {
                     it.copy(error = e.message ?: "Failed to add task")
                 }
+            }finally {
+                setLoading(false)
             }
         }
     }
 
     private fun updateTask(task: Task) {
         viewModelScope.launch {
+            clearError()
+            setLoading(true)
             try {
-                repository.updateTask(task)
+                useCase.updateTask(task)
                 scheduler.cancel(task.id)
 
-                task.reminderDate?.let {
+                task.reminderDateTime?.let {
                     scheduler.schedule(
-                        taskId= task.id,
-                        title = task.title,
-                        reminderTime = it.atStartOfDay()
+                        taskId = task.id, title = task.title, reminderTime = it
                     )
                 }
+                _uiEvent.emit(TaskUiEvent.NavigateBack)
             } catch (e: Exception) {
                 _state.update {
                     it.copy(error = e.message ?: "Failed to update task")
                 }
+            }finally {
+                setLoading(false)
             }
         }
     }
 
     private fun deleteTask(taskId: Long) {
         viewModelScope.launch {
-            val task = state.value.tasks.firstOrNull{ it.id == taskId} ?: repository.getTaskById(taskId)
+            clearError()
+            setLoading(true)
+            val task = state.value.tasks.firstOrNull {
+                it.id == taskId
+            } ?: useCase.getTaskById(taskId)
             task?.let { task ->
                 try {
-                    repository.deleteTask(task)
+                    useCase.deleteTask(task)
 
                     scheduler.cancel(taskId)
-                } catch (e: Exception) {
-                    _state.update { it.copy(error = "Delete Failed") }
-                }
-                recentlyDeletedTask = task
-                viewModelScope.launch{
+
+                    recentlyDeletedTask = task
+
                     _uiEvent.emit(
                         TaskUiEvent.ShowSnackbar(
-                            message = "Task Deleted",
-                            action = "Undo"
+                            message = "Task Deleted", action = "Undo"
                         )
                     )
+                } catch (e: Exception) {
+                    _state.update {
+                        it.copy(error = e.message ?: "Delete Failed")
+                    }
+                }finally {
+                    setLoading(false)
                 }
+
             }
         }
     }
 
     private fun restoreDeletedTask() {
-        viewModelScope.launch{
-            recentlyDeletedTask?.let { task->
-                repository.insertTask(task)
+        viewModelScope.launch {
+            clearError()
+            setLoading(true)
+            recentlyDeletedTask?.let { task ->
+                try {
+                    val restoredTaskId = useCase.addTask(task)
 
-                task.reminderDate?.let {
-                    scheduler.schedule(
-                        taskId = task.id,
-                        title = task.title,
-                        reminderTime = it.atStartOfDay()
-                    )
+                    task.reminderDateTime?.let {
+                        scheduler.schedule(
+                            taskId = restoredTaskId, title = task.title, reminderTime = it
+                        )
+                    }
+                    recentlyDeletedTask = null
+                } catch (e: Exception) {
+                    _state.update {
+                        it.copy(error = e.message ?: "Failed to restore task")
+                    }
+                }finally {
+                    setLoading(false)
                 }
-                recentlyDeletedTask=null
             }
         }
     }
 
     private fun toggleTask(taskId: Long) {
+
         viewModelScope.launch {
-            val task = repository.getTaskById(taskId)
+            clearError()
+            setLoading(true)
+            val task = state.value.tasks.firstOrNull {
+                it.id == taskId
+            } ?: useCase.getTaskById(taskId)
+
             task?.let {
-                repository.updateTask(it.copy(isCompleted = !it.isCompleted))
+                try {
+                    useCase.toggleTask(it)
+                } catch (e: Exception) {
+                    _state.update {
+                        it.copy(
+                            error = e.message ?: "Failed to update task"
+                        )
+                    }
+                }finally {
+                    setLoading(false)
+                }
             }
         }
     }
@@ -181,44 +237,4 @@ class TaskViewModel(
         return state.value.tasks.firstOrNull { it.id == taskId }
     }
 
-    /*    private fun applyFilters() {
-            var filtered = cachedTasks
-            val query = _state.value.searchQuery
-            if (query.isNotBlank()) {
-                filtered = filtered.filter {
-                    it.title.contains(query, ignoreCase = true) ||
-                            it.description.contains(query, ignoreCase = true)
-                }
-            }
-            filtered = sortTasks(filtered, _state.value.sortOptions)
-
-            _state.update {
-                it.copy(
-                    tasks = filtered, isLoading = false
-                )
-            }
-        }*/
-
-    /*private fun sortTasks(
-        tasks: List<Task>, options: SortOptions
-    ): List<Task> {
-        val sorted = when (options.primary) {
-            SortField.TITLE -> tasks.sortedBy { it.title.lowercase() }
-
-            SortField.PRIORITY -> tasks.sortedBy { it.priority }
-
-            SortField.DUE_DATE -> tasks.sortedBy { it.dueDate }
-
-            SortField.COMPLETION_STATUS -> tasks.sortedBy { it.isCompleted }
-
-            SortField.REMINDER_DATE -> tasks.sortedBy { it.reminderDate }
-
-            SortField.CREATED_DATE -> tasks.sortedBy { it.id }
-
-        }
-        return if (options.order == SortOrder.DESCENDING)
-            sorted.reversed()
-        else sorted
-
-    }*/
 }

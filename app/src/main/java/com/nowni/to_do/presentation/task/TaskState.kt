@@ -8,6 +8,7 @@ import com.nowni.to_do.domain.sort.SortOrder
 data class TaskState(
     val tasks: List<Task> = emptyList(),
     val isLoading: Boolean = true,
+    val isSearching: Boolean = false,
     val error: String? = null,
     val searchQuery: String = "",
     val sortOptions: SortOptions = SortOptions(

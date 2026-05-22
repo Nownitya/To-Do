@@ -3,7 +3,6 @@ package com.nowni.to_do.core.notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.nowni.to_do.R
 
@@ -14,7 +13,7 @@ object NotificationHelper {
             CHANNEL_ID,
             "Task Reminder",
             NotificationManager.IMPORTANCE_HIGH
-        )
+        ).apply { description= "Notifications for task reminders" }
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
     }
@@ -25,6 +24,8 @@ object NotificationHelper {
             .setContentText(title)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setAutoCancel(true)
             .build()
     }
 }

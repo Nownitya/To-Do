@@ -5,4 +5,5 @@ sealed class TaskUiEvent {
         val message:String,
         val action:String?= null
     ): TaskUiEvent()
+    data object NavigateBack : TaskUiEvent()
 }

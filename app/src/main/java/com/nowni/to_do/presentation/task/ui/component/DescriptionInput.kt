@@ -18,7 +18,8 @@ fun DescriptionInput(
         onValueChange= onValueChange,
         modifier=modifier,
         label ={ Text("Description")},
-        minLines = 3
+        minLines = 3,
+        maxLines = 6
     )
 }
 

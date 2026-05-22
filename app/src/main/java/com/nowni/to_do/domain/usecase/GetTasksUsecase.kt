@@ -21,9 +21,7 @@ class GetTasksUseCase(private val repository: TaskRepository) {
                             it.description.contains(searchQuery, ignoreCase = true)
                 }
             }
-            filtered = sortTasks(filtered, sortOptions)
-            filtered
-
+            sortTasks(filtered, sortOptions)
         }
     }
 
@@ -39,7 +37,7 @@ class GetTasksUseCase(private val repository: TaskRepository) {
 
             SortField.COMPLETION_STATUS -> tasks.sortedBy { it.isCompleted }
 
-            SortField.REMINDER_DATE -> tasks.sortedBy { it.reminderDate }
+            SortField.REMINDER_DATE -> tasks.sortedBy { it.reminderDateTime }
 
             SortField.CREATED_DATE -> tasks.sortedBy { it.id }
 

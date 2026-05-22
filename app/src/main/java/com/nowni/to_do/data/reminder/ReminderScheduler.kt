@@ -4,13 +4,14 @@ import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.setInputMerger
 import androidx.work.workDataOf
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Duration
+import java.time.LocalDateTime
 
 class ReminderScheduler(private val context: Context) {
+
+    private fun workName(taskId: Long) = "task_reminder_$taskId"
+
     fun schedule(
         taskId: Long,
         title: String,
@@ -21,18 +22,17 @@ class ReminderScheduler(private val context: Context) {
             reminderTime
         ).toMillis()
 
-        if (delay<=0) return
+        if (delay <= 0) return
         val workRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS)
             .setInputData(
                 workDataOf("title" to title)
             )
-//            .ad  skId.toString())
             .build()
 
         WorkManager.getInstance(context)
             .enqueueUniqueWork(
-                "task_$taskId",
+                workName(taskId),
                 ExistingWorkPolicy.REPLACE,
                 workRequest
             )
@@ -40,7 +40,7 @@ class ReminderScheduler(private val context: Context) {
 
     fun cancel(taskId: Long) {
         WorkManager.getInstance(context)
-            .cancelUniqueWork("task_$taskId")
+            .cancelUniqueWork(workName(taskId))
     }
 
 

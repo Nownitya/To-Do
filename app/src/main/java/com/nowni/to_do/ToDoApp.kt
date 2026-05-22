@@ -1,6 +1,6 @@
 package com.nowni.to_do
 
-import android.content.res.Resources
+import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -50,11 +50,19 @@ fun TodoApp() {
             AppNavGraph(
                 onThemeToggle = {
                     val next = when (themeMode) {
-                        ThemeMode.DARK -> ThemeMode.LIGHT
+                        ThemeMode.SYSTEM -> ThemeMode.LIGHT
                         ThemeMode.LIGHT -> ThemeMode.DARK
-                        ThemeMode.SYSTEM -> ThemeMode.DARK
+                        ThemeMode.DARK -> ThemeMode.SYSTEM
                     }
                     viewModel.setTheme(next)
+
+                    Toast.makeText(
+                        context, when (next) {
+                            ThemeMode.SYSTEM -> "System Theme"
+                            ThemeMode.LIGHT -> "Light Theme"
+                            ThemeMode.DARK -> "Dark"
+                        }, Toast.LENGTH_SHORT
+                    ).show()
                 }
             )
         }

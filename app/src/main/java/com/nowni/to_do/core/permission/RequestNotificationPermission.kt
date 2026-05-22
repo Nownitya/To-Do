@@ -12,15 +12,12 @@ fun RequestNotificationPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
         val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = {}
-        )
+            contract = ActivityResultContracts.RequestPermission(), onResult = {})
 
         LaunchedEffect(Unit) {
-            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-
+            runCatching {
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
-
     }
-
 }

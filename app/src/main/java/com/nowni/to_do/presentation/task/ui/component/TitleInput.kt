@@ -20,7 +20,12 @@ fun TitleInput(
         modifier = modifier,
         label = { Text("Title") },
         singleLine = true,
-        isError = isError
+        isError = isError,
+        supportingText = {
+            if (isError) {
+                Text("Title cannot be empty")
+            }
+        }
     )
 }
 

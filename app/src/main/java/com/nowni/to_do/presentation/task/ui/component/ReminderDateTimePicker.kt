@@ -18,7 +18,7 @@ fun ReminderDateTimePicker(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
     val text = dateTime?.format(formatter) ?: "Select reminder time"
 
     OutlinedTextField(
