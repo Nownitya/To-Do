@@ -25,7 +25,6 @@ class TaskRepositoryImpl(
         return taskDao.insertTask(task.toEntity())
     }
 
-
     override suspend fun updateTask(task: Task) {
         taskDao.updateTask(task.toEntity())
     }
