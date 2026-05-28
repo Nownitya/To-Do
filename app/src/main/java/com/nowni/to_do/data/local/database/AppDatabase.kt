@@ -12,5 +12,4 @@ import com.nowni.to_do.data.local.entity.TaskEntity
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
-
 }
