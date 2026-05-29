@@ -19,7 +19,10 @@ class TaskRepositoryImpl(
         }
     }*/
 
-    override fun getTasks(searchQuery: String, sortField: SortField): Flow<List<Task>> {
+    override fun getTasks(
+        searchQuery: String,
+        sortField: SortField
+    ): Flow<List<Task>> {
         val taskFlow = when (sortField) {
             SortField.CREATED_DATE -> {
                 taskDao.getTaskByCreatedDate(searchQuery)

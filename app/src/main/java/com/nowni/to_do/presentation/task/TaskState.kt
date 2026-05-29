@@ -11,8 +11,9 @@ data class TaskState(
     val isSearching: Boolean = false,
     val error: String? = null,
     val searchQuery: String = "",
-    val sortOptions: SortOptions = SortOptions(
+    val sortField: SortField = SortField.CREATED_DATE
+    /*val sortOptions: SortOptions = SortOptions(
         primary = SortField.CREATED_DATE,
         order = SortOrder.DESCENDING
-    )
+    )*/
 )

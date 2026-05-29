@@ -58,7 +58,7 @@ class TaskViewModel(
             }
 
             is TaskEvent.SortTasks -> {
-                _state.update { it.copy(sortOptions = event.options) }
+                _state.update { it.copy(sortField = event.sortField) }
                 observeTasks()
             }
         }
@@ -88,7 +88,8 @@ class TaskViewModel(
 //            _state.update { it.copy(isLoading = true) }
             setLoading(true)
             useCase.getTasks(
-                searchQuery = _state.value.searchQuery, sortOptions = _state.value.sortOptions
+                searchQuery = _state.value.searchQuery,
+                sortField = _state.value.sortField
             ).catch { exception ->
                 _state.update {
                     it.copy(

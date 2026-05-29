@@ -1,6 +1,7 @@
 package com.nowni.to_do.presentation.task
 
 import com.nowni.to_do.domain.model.Task
+import com.nowni.to_do.domain.sort.SortField
 import com.nowni.to_do.domain.sort.SortOptions
 
 sealed interface TaskEvent{
@@ -15,7 +16,7 @@ sealed interface TaskEvent{
 
     /** Search & Sort */
     data class SearchTask(val query:String): TaskEvent
-    data class SortTasks(val options: SortOptions): TaskEvent
+    data class SortTasks(val sortField: SortField): TaskEvent
 
 
 

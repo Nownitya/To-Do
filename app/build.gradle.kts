@@ -11,13 +11,15 @@ android {
     namespace = "com.nowni.to_do"
 //    compileSdk = 36
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.nowni.to_do"
         minSdk = 26
-        targetSdk = 36
+        targetSdk {
+            version = release(37)
+        }
         versionCode = 1
         versionName = "1.0"
 
@@ -29,8 +31,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
     }
