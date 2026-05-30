@@ -5,10 +5,13 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class ReminderScheduler(private val context: Context) {
+class ReminderScheduler @Inject constructor(
+    @ApplicationContext private val context: Context) {
 
     private fun workName(taskId: Long) = "task_reminder_$taskId"
 

@@ -73,9 +73,11 @@ fun AddEditTaskScreen(
         }
     }
 
-    val existingTask = taskId?.let { id ->
-        state.tasks.firstOrNull { it.id == id }
-    }
+//    val existingTask = taskId?.let { id ->
+//        state.tasks.firstOrNull { it.id == id }
+//    }
+
+    val existingTask = taskId?.let(viewModel::getTaskFromState)
 
     var isInitialized by remember(taskId) { mutableStateOf(false) }
 
@@ -162,73 +164,11 @@ fun AddEditTaskScreen(
 
                     DueDatePicker(
                         date = dueDate, onClick = {
-                            showDueDatePicker = true
+                            if (!showDueDatePicker) {
+                                showDueDatePicker = true
+                            }
                         })
-                    if (showDueDatePicker) {
-                        val datePickerState = rememberDatePickerState(
-                            initialSelectedDateMillis = dueDate?.atStartOfDay(
-                                ZoneId.systemDefault()
-                            )?.toInstant()?.toEpochMilli()
-                        )
-                        DatePickerDialog(
-                            onDismissRequest = { showDueDatePicker = false },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    datePickerState.selectedDateMillis?.let { millis ->
-                                        dueDate = Instant.ofEpochMilli(millis)
-                                            .atZone(ZoneId.systemDefault()).toLocalDate()
-                                    }
-                                    showDueDatePicker = false
-                                }) {
-                                    Text("Ok")
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = {
-                                    showDueDatePicker = false
-                                }) { Text("Cancel") }
-                            }
-                        ) {
-                            DatePicker(state = datePickerState)
-                        }
 
-
-                    }
-
-                    if (showReminderDatePicker) {
-                        val reminderDatePickerState = rememberDatePickerState(
-                            initialSelectedDateMillis = reminderDateTime?.toLocalDate()
-                                ?.atStartOfDay(
-                                    ZoneId.systemDefault()
-                                )?.toInstant()?.toEpochMilli()
-                        )
-                        DatePickerDialog(onDismissRequest = {
-                            showReminderDatePicker = false
-                            if (reminderDateTime == null) {
-                                reminderEnabled = false
-                            }
-                        }, confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    reminderDatePickerState.selectedDateMillis?.let { millis ->
-                                        selectedReminderDate = Instant.ofEpochMilli(millis)
-                                            .atZone(ZoneId.systemDefault()).toLocalDate()
-                                        showReminderDatePicker = false
-                                        showReminderTimePicker = true
-                                    }
-                                }) {
-                                Text("OK")
-                            }
-                        }, dismissButton = {
-                            TextButton(onClick = { showReminderDatePicker = false
-                            if(reminderDateTime==null) {
-                                reminderEnabled = false
-                            }
-                            }) { Text("Cancel") }
-                        }) {
-                            DatePicker(state = reminderDatePickerState)
-                        }
-                    }
 
                     ReminderToggle(
                         enabled = reminderEnabled, onToggle = { enabled ->
@@ -241,13 +181,17 @@ fun AddEditTaskScreen(
                             } else {
                                 reminderDateTime = null
                             }
-                        })
+                        }
+                    )
 
                     if (reminderEnabled) {
                         ReminderDateTimePicker(
                             dateTime = reminderDateTime, onClick = {
-                                showReminderDatePicker = true
-                            })
+                                if (!showReminderDatePicker) {
+                                    showReminderDatePicker = true
+                                }
+                            }
+                        )
                     }
 
 //                    Spacer(Modifier.weight(1f))
@@ -288,7 +232,9 @@ fun AddEditTaskScreen(
                         if (selectedDateTime.isAfter(LocalDateTime.now())) {
                             reminderDateTime = selectedDateTime
                         } else {
-                            Toast.makeText(context, "Please select a future time", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context, "Please select a future time", Toast.LENGTH_SHORT
+                            ).show()
 //                            if (reminderDateTime == null) {reminderEnabled = false}
                         }
                     }
@@ -302,6 +248,69 @@ fun AddEditTaskScreen(
                 }
             }
             picker.show()
+        }
+    }
+
+    if (showDueDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = dueDate?.atStartOfDay(
+                ZoneId.systemDefault()
+            )?.toInstant()?.toEpochMilli()
+        )
+        DatePickerDialog(onDismissRequest = { showDueDatePicker = false }, confirmButton = {
+            TextButton(onClick = {
+                datePickerState.selectedDateMillis?.let { millis ->
+                    dueDate = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                }
+                showDueDatePicker = false
+            }) {
+                Text("Ok")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                showDueDatePicker = false
+            }) { Text("Cancel") }
+        }) {
+            DatePicker(state = datePickerState)
+        }
+
+
+    }
+
+    if (showReminderDatePicker) {
+        val reminderDatePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = reminderDateTime?.toLocalDate()?.atStartOfDay(
+                    ZoneId.systemDefault()
+                )?.toInstant()?.toEpochMilli()
+        )
+        DatePickerDialog(onDismissRequest = {
+            showReminderDatePicker = false
+            if (reminderDateTime == null) {
+                reminderEnabled = false
+            }
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    reminderDatePickerState.selectedDateMillis?.let { millis ->
+                        selectedReminderDate =
+                            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        showReminderDatePicker = false
+                        showReminderTimePicker = true
+                    }
+                }) {
+                Text("OK")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                showReminderDatePicker = false
+                if (reminderDateTime == null) {
+                    reminderEnabled = false
+                }
+            }) { Text("Cancel") }
+        }) {
+            DatePicker(state = reminderDatePickerState)
         }
     }
 

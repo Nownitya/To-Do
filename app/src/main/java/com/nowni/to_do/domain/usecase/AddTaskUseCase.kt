@@ -2,8 +2,9 @@ package com.nowni.to_do.domain.usecase
 
 import com.nowni.to_do.domain.model.Task
 import com.nowni.to_do.domain.repository.TaskRepository
+import javax.inject.Inject
 
-class AddTaskUseCase(
+class AddTaskUseCase @Inject constructor(
     private val repository: TaskRepository
 ) {
     suspend operator fun invoke(task: Task): Long {

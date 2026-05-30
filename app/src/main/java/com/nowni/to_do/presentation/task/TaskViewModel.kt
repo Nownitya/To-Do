@@ -1,10 +1,12 @@
 package com.nowni.to_do.presentation.task
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nowni.to_do.data.reminder.ReminderScheduler
 import com.nowni.to_do.domain.model.Task
 import com.nowni.to_do.domain.usecase.TaskUseCases
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,9 +16,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TaskViewModel(
-    private val useCase: TaskUseCases, private val scheduler: ReminderScheduler
+@HiltViewModel
+class TaskViewModel @Inject constructor(
+    private val useCase: TaskUseCases,
+    private val scheduler: ReminderScheduler
 ) : ViewModel() {
 
     // later: viewModelScope.launch{ . . . }
@@ -34,7 +39,13 @@ class TaskViewModel(
     private var recentlyDeletedTask: Task? = null
 
     init {
+        Log.d("TaskViewModel", "Created")
         observeTasks()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("TaskViewModel", "Cleared")
     }
 
     fun onEvent(event: TaskEvent) {
@@ -213,7 +224,7 @@ class TaskViewModel(
 
         viewModelScope.launch {
             clearError()
-            setLoading(true)
+//            setLoading(true)    // If remove this - it will make checkbox interactions feel instant.
             val task = state.value.tasks.firstOrNull {
                 it.id == taskId
             } ?: useCase.getTaskById(taskId)
@@ -222,15 +233,19 @@ class TaskViewModel(
                 try {
                     useCase.toggleTask(it)
                 } catch (e: Exception) {
-                    _state.update {
-                        it.copy(
+                    _state.update { update->
+                        update.copy(
                             error = e.message ?: "Failed to update task"
                         )
                     }
-                }finally {
-                    setLoading(false)
                 }
             }
+        }
+    }
+
+    fun getTask(taskId: Long):Task?{
+        return state.value.tasks.firstOrNull{
+            it.id == taskId
         }
     }
 

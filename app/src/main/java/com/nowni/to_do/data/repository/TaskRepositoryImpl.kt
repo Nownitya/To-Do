@@ -8,8 +8,9 @@ import com.nowni.to_do.domain.repository.TaskRepository
 import com.nowni.to_do.domain.sort.SortField
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class TaskRepositoryImpl(
+class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
 
