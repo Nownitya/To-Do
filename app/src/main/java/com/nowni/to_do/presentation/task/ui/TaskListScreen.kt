@@ -58,7 +58,7 @@ fun TaskListScreen(
     onEditTask: (Long) -> Unit,
     onDeleteTask: (Long) -> Unit,
     onToggleTask: (Long) -> Unit,
-    onThemeToggle: () -> Unit
+    onSettingsClick: () -> Unit
 ) {
 
     var previousSize by remember {
@@ -105,7 +105,7 @@ fun TaskListScreen(
             ExpandableSearchAppBar(
                 searchQuery = searchQuery,
                 onSearchQueryChange = onSearchQueryChange,
-                onThemeToggle = onThemeToggle
+                onSettingsClick = onSettingsClick
             )
 
         }, floatingActionButton = {
