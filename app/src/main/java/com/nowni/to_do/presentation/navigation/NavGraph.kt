@@ -61,7 +61,6 @@ fun AppNavGraph() {
             )
         }
         entry<AddEditTask> { key ->
-
             AddEditTaskScreen(
                 taskId = key.taskId,
                 viewModel = viewModel,

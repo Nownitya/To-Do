@@ -28,6 +28,7 @@ fun TodoApp() {
         Surface {
             RequestNotificationPermission()
             AppNavGraph()
+
         }
     }
 }
