@@ -8,3 +8,6 @@ data object Home : NavKey
 
 @Serializable
 data class AddEditTask(val taskId: Long? = null) : NavKey
+
+@Serializable
+data object Settings : NavKey

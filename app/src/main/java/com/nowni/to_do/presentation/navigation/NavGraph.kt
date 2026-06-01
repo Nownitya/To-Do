@@ -14,17 +14,20 @@ import androidx.navigation3.ui.NavDisplay
 import com.nowni.to_do.presentation.task.TaskEvent
 import com.nowni.to_do.presentation.task.TaskViewModel
 import com.nowni.to_do.presentation.task.ui.AddEditTaskScreen
+import com.nowni.to_do.presentation.task.ui.SettingsScreen
 import com.nowni.to_do.presentation.task.ui.TaskListScreen
+import com.nowni.to_do.presentation.theme.ThemeViewModel
 
 
 @Composable
-fun AppNavGraph(
-    onThemeToggle:()-> Unit
-) {
+fun AppNavGraph() {
     val backStack: NavBackStack<NavKey> = rememberNavBackStack(Home)
     val taskListState = rememberLazyListState()
 
     val viewModel: TaskViewModel = hiltViewModel()
+    val themeViewModel: ThemeViewModel = hiltViewModel()
+
+    val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
 
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Home> {
@@ -52,9 +55,10 @@ fun AppNavGraph(
                 onToggleTask = { taskId ->
                     viewModel.onEvent(TaskEvent.ToggleTask(taskId))
                 },
-                onThemeToggle = onThemeToggle
-
-                )
+                onSettingsClick = {
+                    backStack.add(Settings)
+                }
+            )
         }
         entry<AddEditTask> { key ->
 
@@ -63,6 +67,17 @@ fun AppNavGraph(
                 viewModel = viewModel,
                 onSave = { backStack.removeLastOrNull() },
                 onCancel = { backStack.removeLastOrNull() })
+        }
+
+        entry<Settings> {
+            SettingsScreen(
+                themeMode = themeMode,
+                onThemeSelected = { selectedTheme ->
+                    themeViewModel.setTheme(selectedTheme)
+                },
+                onBack = { backStack.removeLastOrNull() }
+            )
+
         }
     }
 

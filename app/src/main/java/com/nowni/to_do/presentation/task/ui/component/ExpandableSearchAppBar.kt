@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +35,7 @@ import kotlinx.coroutines.delay
 fun ExpandableSearchAppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    onThemeToggle:()-> Unit
+    onSettingsClick: () -> Unit
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -51,8 +52,8 @@ fun ExpandableSearchAppBar(
                 })
 
             false -> DefaultAppBar(
-                onSearchClick = { isSearchActive=true},
-                onThemeToggle = onThemeToggle,
+                onSearchClick = { isSearchActive = true },
+                onSettingsClick = onSettingsClick,
             )
         }
     }
@@ -62,7 +63,8 @@ fun ExpandableSearchAppBar(
 
 @Composable
 fun SearchField(
-    query: String, onQueryChange: (String) -> Unit, onClose: () -> Unit
+    query: String,
+    onQueryChange: (String) -> Unit, onClose: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -109,7 +111,7 @@ fun SearchField(
 @Composable
 fun DefaultAppBar(
     onSearchClick: () -> Unit,
-    onThemeToggle:() -> Unit
+    onSettingsClick: () -> Unit
 ) {
     TopAppBar(title = { Text("T0-Do") }, actions = {
         IconButton(
@@ -119,10 +121,10 @@ fun DefaultAppBar(
                 imageVector = Icons.Default.Search, contentDescription = null
             )
         }
-        IconButton(onClick = onThemeToggle) {
+        IconButton(onClick = onSettingsClick) {
             Icon(
-                imageVector = Icons.Default.DarkMode,
-                contentDescription = "Toggle Theme"
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings"
             )
         }
 
