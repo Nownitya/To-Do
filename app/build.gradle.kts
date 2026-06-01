@@ -1,5 +1,3 @@
-import java.awt.SystemColor.window
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,7 +21,7 @@ android {
             version = release(37)
         }
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

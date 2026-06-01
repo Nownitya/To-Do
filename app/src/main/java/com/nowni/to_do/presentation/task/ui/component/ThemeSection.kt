@@ -18,12 +18,6 @@ fun ThemeSection(
     onThemeSelected: (ThemeMode) -> Unit
 ) {
     Column {
-        Text("Appearance",
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            )
-        )
         ThemeMode.entries.forEach { theme->
             ListItem(modifier = Modifier.fillMaxWidth()
                 .selectable(

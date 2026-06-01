@@ -16,7 +16,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.nowni.to_do.BuildConfig
 import com.nowni.to_do.domain.model.ThemeMode
+import com.nowni.to_do.presentation.task.ui.component.SettingsSection
 import com.nowni.to_do.presentation.task.ui.component.ThemeSection
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,18 +52,30 @@ fun SettingsScreen(
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            SettingsSection(title = "Appearance")
+
             ThemeSection(
                 selectedTheme = themeMode,
                 onThemeSelected = onThemeSelected
             )
 
-            // TODO: Version strings should eventually come from BuildConfig
+            SettingsSection(title = "About")
+
+            ListItem(
+                headlineContent = {
+                    Text("App Name")
+                },
+                supportingContent = {
+                    Text("ToDo")
+                }
+            )
+
             ListItem(
                 headlineContent = {
                     Text("Version")
                 },
                 supportingContent = {
-                    Text("0.7")
+                    Text(BuildConfig.VERSION_NAME)
                 }
             )
         }
