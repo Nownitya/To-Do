@@ -11,7 +11,8 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 class ReminderScheduler @Inject constructor(
-    @ApplicationContext private val context: Context) {
+    @ApplicationContext private val context: Context
+) {
 
     private fun workName(taskId: Long) = "task_reminder_$taskId"
 
@@ -29,7 +30,10 @@ class ReminderScheduler @Inject constructor(
         val workRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS)
             .setInputData(
-                workDataOf("title" to title)
+                workDataOf(
+                    "title" to title,
+                    "taskId" to taskId
+                )
             )
             .build()
 

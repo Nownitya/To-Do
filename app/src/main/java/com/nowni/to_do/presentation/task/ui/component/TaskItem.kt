@@ -77,11 +77,7 @@ fun TaskItem(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
-//            .clickable(onClickLabel = "Open task") {
-//                onTaskClick(task.id)
-//            },
-        ,
+            .animateContentSize(),
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
@@ -95,11 +91,6 @@ fun TaskItem(
                 modifier = Modifier
                     .weight(1f)
                     .graphicsLayer(alpha = completedAlpha),
-                /*.toggleable(
-                    value = task.isCompleted,
-                    onValueChange = { onToggleTask(task.id) },
-                    role = Role.Checkbox
-                ),*/
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
@@ -118,11 +109,12 @@ fun TaskItem(
                 Column(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 8.dp)
+                        .fillMaxWidth()
+                        .weight(1f)
                         .clickable(onClickLabel = "Open task") {
                             onTaskClick(task.id)
                         },
                     verticalArrangement = Arrangement.spacedBy(4.dp)
-//                        .graphicsLayer(alpha = completedAlpha)
                 ) {
                     Text(
                         text = task.title,
@@ -149,7 +141,6 @@ fun TaskItem(
                     }
 
                     Row(
-//                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

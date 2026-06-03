@@ -1,7 +1,9 @@
 package com.nowni.to_do.presentation.navigation
 
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -11,6 +13,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.nowni.to_do.MainActivity
 import com.nowni.to_do.presentation.task.TaskEvent
 import com.nowni.to_do.presentation.task.TaskViewModel
 import com.nowni.to_do.presentation.task.ui.AddEditTaskScreen
@@ -29,10 +32,33 @@ fun AppNavGraph() {
 
     val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
 
+    val notificationTaskId = MainActivity.notificationTaskId.longValue
+
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Home> {
 
+            LaunchedEffect(notificationTaskId) {
+                if (notificationTaskId != -1L) {
+                    println("Notification taskId =$notificationTaskId")
+                }
+            }
+
             val state by viewModel.state.collectAsStateWithLifecycle()
+            LaunchedEffect(
+                notificationTaskId,
+                state.tasks
+            ) {
+                if (notificationTaskId == -1L) return@LaunchedEffect
+                val taskIndex = state.tasks.indexOfFirst {
+                    it.id == notificationTaskId
+                }
+                if (taskIndex >= 0) {
+                    taskListState.animateScrollToItem(index = taskIndex,
+                        scrollOffset = -100)
+                    MainActivity.notificationTaskId.longValue = -1L
+                }
+            }
+
 
             TaskListScreen(
                 tasks = state.tasks,

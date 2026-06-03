@@ -18,23 +18,26 @@ class ReminderWorker(
     override suspend fun doWork(): Result {
 
         val hasPermissions =
-            Build.VERSION.SDK_INT<Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(
-            applicationContext,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(
+                        applicationContext,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasPermissions) {
             return Result.failure()
         }
 
         val title = inputData.getString("title") ?: "Task Reminder"
+        val taskId = inputData.getLong("taskId", -1L)
+
 
         val notification = NotificationHelper.buildNotification(
-            applicationContext,
-            title
+            context = applicationContext,
+            title = title,
+            taskId = taskId
         )
-        
+
         NotificationManagerCompat.from(applicationContext)
             .notify(System.currentTimeMillis().toInt(), notification)
         return Result.success()
