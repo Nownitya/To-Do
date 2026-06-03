@@ -1,5 +1,6 @@
 package com.nowni.to_do.presentation.task.ui.component
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,6 +47,7 @@ import java.time.format.DateTimeFormatter
 fun TaskItem(
     modifier: Modifier = Modifier,
     task: Task,
+    isHighlighted: Boolean = false,
     onToggleTask: (Long) -> Unit,
     onDeleteTask: (Long) -> Unit,
     onTaskClick: (Long) -> Unit,
@@ -73,13 +76,25 @@ fun TaskItem(
     }
 
 
+    val containerColor by animateColorAsState(
+        targetValue = if (isHighlighted) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        }, label = "TaskHighLightColor"
+    )
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
+        color = containerColor,
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = 2.dp
+        tonalElevation = if (isHighlighted) {
+            6.dp
+        } else {
+            2.dp
+        }
     ) {
         Row(
             modifier = Modifier
@@ -102,10 +117,7 @@ fun TaskItem(
                             } else {
                                 "Pending"
                             }
-                        },
-                    checked = task.isCompleted,
-                    onCheckedChange = { onToggleTask(task.id) }
-                )
+                        }, checked = task.isCompleted, onCheckedChange = { onToggleTask(task.id) })
                 Column(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 8.dp)
@@ -113,8 +125,7 @@ fun TaskItem(
                         .weight(1f)
                         .clickable(onClickLabel = "Open task") {
                             onTaskClick(task.id)
-                        },
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                        }, verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         text = task.title,

@@ -1,10 +1,12 @@
 package com.nowni.to_do.presentation.navigation
 
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavBackStack
@@ -34,35 +36,38 @@ fun AppNavGraph() {
 
     val notificationTaskId = MainActivity.notificationTaskId.longValue
 
+    var highlightedTaskId by remember {
+        mutableLongStateOf(-1L)
+    }
+
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Home> {
 
-            LaunchedEffect(notificationTaskId) {
-                if (notificationTaskId != -1L) {
-                    println("Notification taskId =$notificationTaskId")
-                }
-            }
-
             val state by viewModel.state.collectAsStateWithLifecycle()
             LaunchedEffect(
-                notificationTaskId,
-                state.tasks
+                notificationTaskId, state.tasks
             ) {
                 if (notificationTaskId == -1L) return@LaunchedEffect
                 val taskIndex = state.tasks.indexOfFirst {
                     it.id == notificationTaskId
                 }
                 if (taskIndex >= 0) {
-                    taskListState.animateScrollToItem(index = taskIndex,
-                        scrollOffset = -100)
+                    taskListState.animateScrollToItem(
+                        index = taskIndex, scrollOffset = -100
+                    )
+                    highlightedTaskId = notificationTaskId
+                    kotlinx.coroutines.delay(2500)
+                    highlightedTaskId = -1L
                     MainActivity.notificationTaskId.longValue = -1L
                 }
             }
 
 
+
             TaskListScreen(
                 tasks = state.tasks,
                 listState = taskListState,
+                highlightedTaskId = highlightedTaskId,
                 viewModel = viewModel,
                 searchQuery = state.searchQuery,
                 onSearchQueryChange = { viewModel.onEvent(TaskEvent.SearchTask(it)) },
@@ -83,8 +88,7 @@ fun AppNavGraph() {
                 },
                 onSettingsClick = {
                     backStack.add(Settings)
-                }
-            )
+                })
         }
         entry<AddEditTask> { key ->
             AddEditTaskScreen(
@@ -95,13 +99,9 @@ fun AppNavGraph() {
         }
 
         entry<Settings> {
-            SettingsScreen(
-                themeMode = themeMode,
-                onThemeSelected = { selectedTheme ->
-                    themeViewModel.setTheme(selectedTheme)
-                },
-                onBack = { backStack.removeLastOrNull() }
-            )
+            SettingsScreen(themeMode = themeMode, onThemeSelected = { selectedTheme ->
+                themeViewModel.setTheme(selectedTheme)
+            }, onBack = { backStack.removeLastOrNull() })
 
         }
     }

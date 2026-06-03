@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,6 +50,7 @@ import com.nowni.to_do.presentation.task.ui.component.TaskItem
 fun TaskListScreen(
     tasks: List<Task>,
     listState: LazyListState,
+    highlightedTaskId: Long,
     viewModel: TaskViewModel,
     isLoading: Boolean,
     error: String?,
@@ -64,6 +66,9 @@ fun TaskListScreen(
     var previousSize by remember {
         mutableIntStateOf(tasks.size)
     }
+
+
+
     LaunchedEffect(tasks.size) {
         if (tasks.isNotEmpty() && tasks.size > previousSize) {
 //            listState.scrollToItem(0)
@@ -97,139 +102,139 @@ fun TaskListScreen(
     }
 
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
-        },
-        topBar = {
-            ExpandableSearchAppBar(
-                searchQuery = searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
-                onSettingsClick = onSettingsClick
+
+    Scaffold(snackbarHost = {
+        SnackbarHost(snackbarHostState)
+    }, topBar = {
+        ExpandableSearchAppBar(
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            onSettingsClick = onSettingsClick
+        )
+
+    }, floatingActionButton = {
+        FloatingActionButton(onClick = onAddTask) {
+            Icon(
+                imageVector = Icons.Default.Add, contentDescription = "Add Task"
             )
-
-        }, floatingActionButton = {
-            FloatingActionButton(onClick = onAddTask) {
-                Icon(
-                    imageVector = Icons.Default.Add, contentDescription = "Add Task"
-                )
-            }
-        }, content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                when {
-                    isLoading && tasks.isEmpty() -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+        }
+    }, content = { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                isLoading && tasks.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
+                }
 
-                    error != null -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = error)
-                        }
+                error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = error)
                     }
+                }
 
-                    /*tasks.isEmpty() -> {
+                /*tasks.isEmpty() -> {
+                    EmptyTaskList(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }*/
+
+                tasks.isEmpty() -> {
+                    if (searchQuery.isBlank()) {
                         EmptyTaskList(
                             modifier = Modifier.fillMaxSize()
                         )
-                    }*/
-
-                    tasks.isEmpty()-> {
-                        if (searchQuery.isBlank()) {
-                            EmptyTaskList(
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center){
-                                Text(text = "No tasks found.")
-                            }
-
-                        }
-                    }
-
-                    else -> {
-                        LazyColumn(
-                            state = listState,
+                    } else {
+                        Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            contentAlignment = Alignment.Center
                         ) {
-                            items(
-                                items = tasks,
-                                key = { task -> task.id },
-                            ) { task ->
-                                val dismissState = rememberSwipeToDismissBoxState(
-                                    positionalThreshold = { distance ->
-                                        distance * 0.5f
-                                    })
+                            Text(text = "No tasks found.")
+                        }
 
-                                /*LaunchedEffect(dismissState.currentValue) {
-                                    if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-                                        onDeleteTask(task.id)
-                                    }
-                                }*/
+                    }
+                }
 
-                                if (dismissState.currentValue== SwipeToDismissBoxValue.EndToStart){
-                                    LaunchedEffect(task.id) {
-                                        onDeleteTask(task.id)
-                                    }
+                else -> {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = tasks,
+                            key = { task -> task.id },
+                        ) { task ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                positionalThreshold = { distance ->
+                                    distance * 0.5f
+                                })
+
+                            /*LaunchedEffect(dismissState.currentValue) {
+                                if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                                    onDeleteTask(task.id)
                                 }
-                                /*val color = when (dismissState.targetValue) {
+                            }*/
+
+                            if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                                LaunchedEffect(task.id) {
+                                    onDeleteTask(task.id)
+                                }
+                            }/*val color = when (dismissState.targetValue) {
                                     SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
                                     else -> MaterialTheme.colorScheme.surface
                                 }*/
 
-                                val backgroundColor by animateColorAsState(
-                                    targetValue = when (dismissState.targetValue){
-                                        SwipeToDismissBoxValue.EndToStart ->
-                                            MaterialTheme.colorScheme.errorContainer
-                                        else -> MaterialTheme.colorScheme.surface
-                                    },
-                                    label = "SwipeBackgroundColor"
-                                )
-                                SwipeToDismissBox(
-                                    state = dismissState,
-                                    enableDismissFromStartToEnd = false,
-                                    backgroundContent = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(horizontal = 16.dp)
-                                                .background(backgroundColor),
-                                            contentAlignment = Alignment.CenterEnd
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = MaterialTheme.colorScheme.error
-                                            )
-                                        }
-                                    },
-                                    content = {
-                                        TaskItem(
-                                            modifier = Modifier.animateItem(),
-                                            task = task,
-                                            onToggleTask = onToggleTask,
-                                            onDeleteTask = { onDeleteTask(task.id) },
-                                            onTaskClick = { onEditTask(task.id) })
-                                    })
-                            }
+                            val backgroundColor by animateColorAsState(
+                                targetValue = when (dismissState.targetValue) {
+                                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+
+                                    else -> MaterialTheme.colorScheme.surface
+                                }, label = "SwipeBackgroundColor"
+                            )
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                enableDismissFromStartToEnd = false,
+                                backgroundContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp)
+                                            .background(backgroundColor),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                },
+                                content = {
+                                    TaskItem(
+                                        modifier = Modifier.animateItem(),
+                                        task = task,
+                                        isHighlighted = task.id == highlightedTaskId,
+                                        onToggleTask = onToggleTask,
+                                        onDeleteTask = { onDeleteTask(task.id) },
+                                        onTaskClick = { onEditTask(task.id) })
+                                })
                         }
                     }
                 }
             }
+        }
 
 
-        })
+    })
 
 }
