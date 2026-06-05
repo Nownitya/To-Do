@@ -12,7 +12,6 @@ fun TitleInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    isError: Boolean = false
 ) {
     OutlinedTextField(
         value = value,
@@ -20,12 +19,6 @@ fun TitleInput(
         modifier = modifier,
         label = { Text("Title") },
         singleLine = true,
-        isError = isError,
-        supportingText = {
-            if (isError) {
-                Text("Title cannot be empty")
-            }
-        }
     )
 }
 
@@ -41,6 +34,6 @@ fun TitleInputPreview() {
 @Composable
 fun TitleInputErrorPreview() {
     ToDoTheme {
-        TitleInput(value = "Sample Title with Error", onValueChange = {}, isError = true)
+        TitleInput(value = "Sample Title with Error", onValueChange = {},)
     }
 }

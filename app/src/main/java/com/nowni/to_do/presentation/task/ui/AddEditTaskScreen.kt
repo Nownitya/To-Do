@@ -149,8 +149,6 @@ fun AddEditTaskScreen(
                         value = title,
                         onValueChange = { title = it.take(100) },
                         modifier = Modifier.fillMaxWidth(),
-                        isError = title.isBlank()
-
                     )
                     DescriptionInput(
                         value = description,
