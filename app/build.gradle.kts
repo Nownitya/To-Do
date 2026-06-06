@@ -4,12 +4,11 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.dagger.hilt)
-//    id("kotlin-kapt")
+    alias(libs.plugins.androidx.room)
 }
 
 android {
     namespace = "com.nowni.to_do"
-//    compileSdk = 36
     compileSdk {
         version = release(37)
     }
@@ -21,7 +20,7 @@ android {
             version = release(37)
         }
         versionCode = 1
-        versionName = "0.7"
+        versionName = "0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +42,14 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+ksp {
+    arg("dagger.fastInit", "enabled")
+    arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
 }
 
 dependencies {
